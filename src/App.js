@@ -23,6 +23,7 @@ function App() {
   tipo: "",
   estado: "",
 });
+const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
   // Cargar tareas desde el backend
 useEffect(() => {
@@ -118,32 +119,48 @@ useEffect(() => {
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
       <h1>Tareas Judiciales y No Judiciales</h1>
-
-      <form onSubmit={handleSubmit} style={{ marginBottom: "2rem" }}>
-        <input name="cliente" value={formData.cliente} onChange={handleChange} placeholder="Cliente" required />
-        <input name="asunto" value={formData.asunto} onChange={handleChange} placeholder="Asunto" required />
-        <select name="tipo" value={formData.tipo} onChange={handleChange}>
-          <option value="judicial">Judicial</option>
-          <option value="no_judicial">No judicial</option>
-        </select>
-        <input type="date" name="fecha_inicio" value={formData.fecha_inicio} onChange={handleChange} required />
-        <input name="ultima_actividad" value={formData.ultima_actividad} onChange={handleChange} placeholder="Última actividad" />
-        <input type="date" name="fecha_ultima_actividad" value={formData.fecha_ultima_actividad} onChange={handleChange} />
-        <input type="date" name="fecha_notificacion" value={formData.fecha_notificacion} onChange={handleChange} />
-        <input type="number" name="dias_para_retirar_copias" value={formData.dias_para_retirar_copias} onChange={handleChange} placeholder="Días para retirar copias" />
-        <input type="date" name="fecha_limite_retirar_copias" value={formData.fecha_limite_retirar_copias} onChange={handleChange} />
-        <input type="date" name="fecha_limite_acto" value={formData.fecha_limite_acto} onChange={handleChange} />
-        <select name="estado" value={formData.estado} onChange={handleChange}>
-          <option value="pendiente">Pendiente</option>
-          <option value="en curso">En curso</option>
-          <option value="finalizada">Finalizada</option>
-        </select>
-        <label>
-          Vencida
-          <input type="checkbox" name="vencida" checked={formData.vencida} onChange={handleChange} />
-        </label>
-        <button type="submit">Crear tarea</button>
-      </form>
+<button
+  onClick={() => setMostrarFormulario(!mostrarFormulario)}
+  style={{
+    marginBottom: "1rem",
+    padding: "0.5rem 1rem",
+    fontSize: "1rem",
+    borderRadius: "5px",
+    backgroundColor: "#1976d2",
+    color: "white",
+    border: "none",
+    cursor: "pointer"
+  }}
+>
+  {mostrarFormulario ? "Cancelar" : "➕ Agregar tarea"}
+</button>
+      {mostrarFormulario && (
+  <form onSubmit={handleSubmit} style={{ marginBottom: "2rem" }}>
+    <input name="cliente" value={formData.cliente} onChange={handleChange} placeholder="Cliente" required />
+    <input name="asunto" value={formData.asunto} onChange={handleChange} placeholder="Asunto" required />
+    <select name="tipo" value={formData.tipo} onChange={handleChange}>
+      <option value="judicial">Judicial</option>
+      <option value="no_judicial">No judicial</option>
+    </select>
+    <input type="date" name="fecha_inicio" value={formData.fecha_inicio} onChange={handleChange} required />
+    <input name="ultima_actividad" value={formData.ultima_actividad} onChange={handleChange} placeholder="Última actividad" />
+    <input type="date" name="fecha_ultima_actividad" value={formData.fecha_ultima_actividad} onChange={handleChange} />
+    <input type="date" name="fecha_notificacion" value={formData.fecha_notificacion} onChange={handleChange} />
+    <input type="number" name="dias_para_retirar_copias" value={formData.dias_para_retirar_copias} onChange={handleChange} placeholder="Días para retirar copias" />
+    <input type="date" name="fecha_limite_retirar_copias" value={formData.fecha_limite_retirar_copias} onChange={handleChange} />
+    <input type="date" name="fecha_limite_acto" value={formData.fecha_limite_acto} onChange={handleChange} />
+    <select name="estado" value={formData.estado} onChange={handleChange}>
+      <option value="pendiente">Pendiente</option>
+      <option value="en curso">En curso</option>
+      <option value="finalizada">Finalizada</option>
+    </select>
+    <label>
+      Vencida
+      <input type="checkbox" name="vencida" checked={formData.vencida} onChange={handleChange} />
+    </label>
+    <button type="submit">Crear tarea</button>
+  </form>
+)}
       <div style={{ marginBottom: "2rem", display: "flex", gap: "1rem", alignItems: "center" }}>
         <input
           name="cliente"
