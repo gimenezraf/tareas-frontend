@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import './App.css';
 const API_URL = "https://tareas-api-c5x4.onrender.com";
 
 function App() {
