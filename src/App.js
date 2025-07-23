@@ -97,9 +97,25 @@ useEffect(() => {
       alert("Error al crear tarea");
     }
   };
-  const handleDelete = async (id) => {
-    const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar esta tarea?");
-    if (!confirmacion) return;
+  
+  const handleEliminar = async (id) => {
+    const confirmar = window.confirm("¿Estás seguro de que querés eliminar esta tarea?");
+    if (!confirmar) return;
+
+    try {
+      const res = await fetch(`${API_URL}/tareas/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setTareas(tareas.filter((t) => t.id !== id));
+      } else {
+        alert("Error al eliminar la tarea");
+      }
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+    }
+  };
 
     const res = await fetch(`${API_URL}/tareas/${id}`, {
       method: "DELETE",
@@ -256,7 +272,22 @@ useEffect(() => {
           </div>
 
           <span><strong>Última actividad:</strong> {t.ultima_actividad} ({t.fecha_ultima_actividad})</span><br />
-          <span><strong>Fecha límite acto:</strong> {t.fecha_limite_acto}</span>
+<span><strong>Fecha límite acto:</strong> {t.fecha_limite_acto}</span><br />
+<button
+  onClick={() => handleEliminar(t.id)}
+  style={{
+    marginTop: "0.5rem",
+    padding: "0.25rem 0.5rem",
+    backgroundColor: "#e53935",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "0.8rem"
+  }}
+>
+  🗑 Eliminar
+</button>
         <br />
 <button
   onClick={() => handleDelete(t.id)}
