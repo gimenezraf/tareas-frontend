@@ -97,7 +97,20 @@ useEffect(() => {
       alert("Error al crear tarea");
     }
   };
+  const handleDelete = async (id) => {
+    const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar esta tarea?");
+    if (!confirmacion) return;
 
+    const res = await fetch(`${API_URL}/tareas/${id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setTareas(tareas.filter((t) => t.id !== id));
+    } else {
+      alert("Error al eliminar la tarea");
+    }
+  };
   const esProximaAVencer = (fechaLimite) => {
     if (!fechaLimite) return false;
     const hoy = new Date();
@@ -244,6 +257,22 @@ useEffect(() => {
 
           <span><strong>Última actividad:</strong> {t.ultima_actividad} ({t.fecha_ultima_actividad})</span><br />
           <span><strong>Fecha límite acto:</strong> {t.fecha_limite_acto}</span>
+        <br />
+<button
+  onClick={() => handleDelete(t.id)}
+  style={{
+    marginTop: "0.5rem",
+    padding: "0.25rem 0.5rem",
+    backgroundColor: "#e53935",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "0.8rem"
+  }}
+>
+  🗑 Eliminar
+</button>
         </div>
       ))}
     </div>
