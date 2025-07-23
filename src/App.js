@@ -104,14 +104,52 @@ function App() {
         <button type="submit">Crear tarea</button>
       </form>
 
-      <h2>Listado</h2>
-      <ul>
-        {tareas.map((t) => (
-          <li key={t.id}>
-            <strong>{t.cliente}</strong> - {t.asunto} ({t.tipo}) — {t.estado}
-          </li>
-        ))}
-      </ul>
+      <h2 style={{ textAlign: "center" }}>Listado de tareas</h2>
+
+{tareas.map((t) => (
+  <div key={t.id} className="tarea">
+    <h3>{t.cliente} — {t.asunto}</h3>
+
+    <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+      <span
+        style={{
+          backgroundColor: t.tipo === "judicial" ? "#1976d2" : "#43a047",
+          color: "white",
+          padding: "0.25rem 0.5rem",
+          borderRadius: "5px",
+          fontSize: "0.8rem"
+        }}
+      >
+        {t.tipo === "judicial" ? "Judicial" : "No Judicial"}
+      </span>
+
+      {t.vencida ? (
+        <span style={{
+          backgroundColor: "#e53935",
+          color: "white",
+          padding: "0.25rem 0.5rem",
+          borderRadius: "5px",
+          fontSize: "0.8rem"
+        }}>
+          ⚠️ Vencida
+        </span>
+      ) : (
+        <span style={{
+          backgroundColor: "#fdd835",
+          color: "#000",
+          padding: "0.25rem 0.5rem",
+          borderRadius: "5px",
+          fontSize: "0.8rem"
+        }}>
+          {t.estado}
+        </span>
+      )}
+    </div>
+
+    <span><strong>Última actividad:</strong> {t.ultima_actividad} ({t.fecha_ultima_actividad})</span><br />
+    <span><strong>Fecha límite acto:</strong> {t.fecha_limite_acto}</span>
+  </div>
+))}
     </div>
   );
 }
