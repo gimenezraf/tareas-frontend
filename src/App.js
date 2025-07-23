@@ -117,15 +117,6 @@ useEffect(() => {
     }
   };
 
-    const res = await fetch(`${API_URL}/tareas/${id}`, {
-      method: "DELETE",
-    });
-
-    if (res.ok) {
-      setTareas(tareas.filter((t) => t.id !== id));
-    } else {
-      alert("Error al eliminar la tarea");
-    }
   };
   const esProximaAVencer = (fechaLimite) => {
     if (!fechaLimite) return false;
