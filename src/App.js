@@ -215,7 +215,8 @@ useEffect(() => {
     }}
   >
           <h3>{t.cliente} — {t.asunto}</h3>
-<small style={{ color: "#888" }}>ID: {t.id}</small>
+          <small style={{ color: "#888" }}>ID: {t.id}</small>
+          
           <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
             <span
               style={{
