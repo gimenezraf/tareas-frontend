@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import './App.css';
-
 const API_URL = "https://tareas-api-c5x4.onrender.com";
 
 function App() {
   const [tareas, setTareas] = useState([]);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [formData, setFormData] = useState({
     cliente: "",
     asunto: "",
@@ -21,12 +19,26 @@ function App() {
     vencida: false,
   });
 
-  useEffect(() => {
-    fetch(`${API_URL}/tareas`)
-      .then((res) => res.json())
-      .then(setTareas)
-      .catch((err) => console.error("Error al cargar tareas:", err));
-  }, []);
+  // Cargar tareas desde el backend
+useEffect(() => {
+  fetch(`${API_URL}/tareas`)
+    .then((res) => res.json())
+    .then((data) => {
+      const hoy = new Date();
+      const tareasConVencimiento = data.map((t) => {
+        const fechaLimite = new Date(t.fecha_limite_acto);
+        return {
+          ...t,
+          vencida: fechaLimite < hoy.setHours(0, 0, 0, 0),
+        };
+      });
+      const tareasOrdenadas = tareasConVencimiento.sort(
+        (a, b) => new Date(a.fecha_limite_acto) - new Date(b.fecha_limite_acto)
+      );
+      setTareas(tareasOrdenadas);
+    })
+    .catch((err) => console.error("Error al cargar tareas:", err));
+}, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -38,6 +50,7 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const dataToSend = {
       ...formData,
       dias_para_retirar_copias: formData.dias_para_retirar_copias
@@ -68,20 +81,65 @@ function App() {
         estado: "pendiente",
         vencida: false,
       });
-      setMostrarFormulario(false);
     } else {
       alert("Error al crear tarea");
     }
+  };
+
+  const esProximaAVencer = (fechaLimite) => {
+    if (!fechaLimite) return false;
+    const hoy = new Date();
+    const fecha = new Date(fechaLimite);
+    const diferencia = (fecha - hoy) / (1000 * 60 * 60 * 24);
+    return diferencia <= 2 && diferencia >= 0;
   };
 
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
       <h1>Tareas Judiciales y No Judiciales</h1>
 
+      <form onSubmit={handleSubmit} style={{ marginBottom: "2rem" }}>
+        <input name="cliente" value={formData.cliente} onChange={handleChange} placeholder="Cliente" required />
+        <input name="asunto" value={formData.asunto} onChange={handleChange} placeholder="Asunto" required />
+        <select name="tipo" value={formData.tipo} onChange={handleChange}>
+          <option value="judicial">Judicial</option>
+          <option value="no_judicial">No judicial</option>
+        </select>
+        <input type="date" name="fecha_inicio" value={formData.fecha_inicio} onChange={handleChange} required />
+        <input name="ultima_actividad" value={formData.ultima_actividad} onChange={handleChange} placeholder="Última actividad" />
+        <input type="date" name="fecha_ultima_actividad" value={formData.fecha_ultima_actividad} onChange={handleChange} />
+        <input type="date" name="fecha_notificacion" value={formData.fecha_notificacion} onChange={handleChange} />
+        <input type="number" name="dias_para_retirar_copias" value={formData.dias_para_retirar_copias} onChange={handleChange} placeholder="Días para retirar copias" />
+        <input type="date" name="fecha_limite_retirar_copias" value={formData.fecha_limite_retirar_copias} onChange={handleChange} />
+        <input type="date" name="fecha_limite_acto" value={formData.fecha_limite_acto} onChange={handleChange} />
+        <select name="estado" value={formData.estado} onChange={handleChange}>
+          <option value="pendiente">Pendiente</option>
+          <option value="en curso">En curso</option>
+          <option value="finalizada">Finalizada</option>
+        </select>
+        <label>
+          Vencida
+          <input type="checkbox" name="vencida" checked={formData.vencida} onChange={handleChange} />
+        </label>
+        <button type="submit">Crear tarea</button>
+      </form>
+
       <h2 style={{ textAlign: "center" }}>Listado de tareas</h2>
+
       {tareas.map((t) => (
-        <div key={t.id} className="tarea" style={{ marginBottom: "1.5rem", padding: "1rem", border: "1px solid #ddd", borderRadius: "8px" }}>
+  <div
+    key={t.id}
+    className="tarea"
+    style={{
+      backgroundColor: t.vencida ? "#ffeaea" : "white",
+      border: t.vencida ? "2px solid #e53935" : "1px solid #ddd",
+      padding: "1rem",
+      marginBottom: "1rem",
+      borderRadius: "8px"
+    }}
+  >
           <h3>{t.cliente} — {t.asunto}</h3>
+
           <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
             <span
               style={{
@@ -105,6 +163,16 @@ function App() {
               }}>
                 ⚠️ Vencida
               </span>
+            ) : esProximaAVencer(t.fecha_limite_acto) ? (
+              <span style={{
+                backgroundColor: "#fff176",
+                color: "#000",
+                padding: "0.25rem 0.5rem",
+                borderRadius: "5px",
+                fontSize: "0.8rem"
+              }}>
+                ⏳ Próxima a vencer
+              </span>
             ) : (
               <span style={{
                 backgroundColor: "#fdd835",
@@ -117,42 +185,11 @@ function App() {
               </span>
             )}
           </div>
+
           <span><strong>Última actividad:</strong> {t.ultima_actividad} ({t.fecha_ultima_actividad})</span><br />
           <span><strong>Fecha límite acto:</strong> {t.fecha_limite_acto}</span>
         </div>
       ))}
-
-      <button onClick={() => setMostrarFormulario(!mostrarFormulario)} style={{ margin: "1rem auto", display: "block" }}>
-        {mostrarFormulario ? "Cerrar formulario" : "Agregar nueva tarea"}
-      </button>
-
-      {mostrarFormulario && (
-        <form onSubmit={handleSubmit} style={{ marginTop: "2rem" }}>
-          <input name="cliente" value={formData.cliente} onChange={handleChange} placeholder="Cliente" required />
-          <input name="asunto" value={formData.asunto} onChange={handleChange} placeholder="Asunto" required />
-          <select name="tipo" value={formData.tipo} onChange={handleChange}>
-            <option value="judicial">Judicial</option>
-            <option value="no_judicial">No judicial</option>
-          </select>
-          <input type="date" name="fecha_inicio" value={formData.fecha_inicio} onChange={handleChange} required />
-          <input name="ultima_actividad" value={formData.ultima_actividad} onChange={handleChange} placeholder="Última actividad" />
-          <input type="date" name="fecha_ultima_actividad" value={formData.fecha_ultima_actividad} onChange={handleChange} />
-          <input type="date" name="fecha_notificacion" value={formData.fecha_notificacion} onChange={handleChange} />
-          <input type="number" name="dias_para_retirar_copias" value={formData.dias_para_retirar_copias} onChange={handleChange} placeholder="Días para retirar copias" />
-          <input type="date" name="fecha_limite_retirar_copias" value={formData.fecha_limite_retirar_copias} onChange={handleChange} />
-          <input type="date" name="fecha_limite_acto" value={formData.fecha_limite_acto} onChange={handleChange} />
-          <select name="estado" value={formData.estado} onChange={handleChange}>
-            <option value="pendiente">Pendiente</option>
-            <option value="en curso">En curso</option>
-            <option value="finalizada">Finalizada</option>
-          </select>
-          <label>
-            Vencida
-            <input type="checkbox" name="vencida" checked={formData.vencida} onChange={handleChange} />
-          </label>
-          <button type="submit">Crear tarea</button>
-        </form>
-      )}
     </div>
   );
 }
