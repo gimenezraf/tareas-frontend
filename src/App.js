@@ -18,6 +18,11 @@ function App() {
     estado: "pendiente",
     vencida: false,
   });
+  const [filtros, setFiltros] = useState({
+  cliente: "",
+  tipo: "",
+  estado: "",
+});
 
   // Cargar tareas desde el backend
 useEffect(() => {
@@ -47,7 +52,13 @@ useEffect(() => {
       [name]: type === "checkbox" ? checked : value,
     });
   };
-
+  const handleFiltroChange = (e) => {
+    const { name, value } = e.target;
+    setFiltros({
+      ...filtros,
+      [name]: value,
+    });
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -93,7 +104,17 @@ useEffect(() => {
     const diferencia = (fecha - hoy) / (1000 * 60 * 60 * 24);
     return diferencia <= 2 && diferencia >= 0;
   };
+  const tareasFiltradas = tareas.filter((t) => {
+    const coincideCliente =
+      filtros.cliente === "" ||
+      t.cliente.toLowerCase().includes(filtros.cliente.toLowerCase());
 
+    const coincideTipo = filtros.tipo === "" || t.tipo === filtros.tipo;
+
+    const coincideEstado = filtros.estado === "" || t.estado === filtros.estado;
+
+    return coincideCliente && coincideTipo && coincideEstado;
+  });
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
       <h1>Tareas Judiciales y No Judiciales</h1>
@@ -123,10 +144,28 @@ useEffect(() => {
         </label>
         <button type="submit">Crear tarea</button>
       </form>
-
+      <div style={{ marginBottom: "2rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+        <input
+          name="cliente"
+          value={filtros.cliente}
+          onChange={handleFiltroChange}
+          placeholder="Filtrar por cliente"
+        />
+        <select name="tipo" value={filtros.tipo} onChange={handleFiltroChange}>
+          <option value="">Todos los tipos</option>
+          <option value="judicial">Judicial</option>
+          <option value="no_judicial">No judicial</option>
+        </select>
+        <select name="estado" value={filtros.estado} onChange={handleFiltroChange}>
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="en curso">En curso</option>
+          <option value="finalizada">Finalizada</option>
+        </select>
+      </div>
       <h2 style={{ textAlign: "center" }}>Listado de tareas</h2>
 
-      {tareas.map((t) => (
+      {tareasFiltradas.map((t) => (
   <div
     key={t.id}
     className="tarea"
