@@ -216,7 +216,7 @@ useEffect(() => {
   >
           <h3>{t.cliente} — {t.asunto}</h3>
           <small style={{ color: "#888" }}>ID: {t.id}</small>
-          
+
           <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
             <span
               style={{
@@ -280,22 +280,7 @@ useEffect(() => {
 >
   🗑 Eliminar
 </button>
-        <br />
-<button
-  onClick={() => handleDelete(t.id)}
-  style={{
-    marginTop: "0.5rem",
-    padding: "0.25rem 0.5rem",
-    backgroundColor: "#e53935",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontSize: "0.8rem"
-  }}
->
-  🗑 Eliminar
-</button>
+       
         </div>
       ))}
     </div>
