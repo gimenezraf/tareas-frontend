@@ -117,7 +117,6 @@ useEffect(() => {
     }
   };
 
-  };
   const esProximaAVencer = (fechaLimite) => {
     if (!fechaLimite) return false;
     const hoy = new Date();
