@@ -71,11 +71,15 @@ function App() {
 
     let res;
     if (modoEdicion && tareaEditando) {
+      const dataToSendWithoutId = { ...dataToSend };
+      delete dataToSendWithoutId.id;
+
+      console.log("Editando tarea con ID:", tareaEditando.id);
       res = await fetch(`${API_URL}/tareas/${tareaEditando.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSend),
-      });
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dataToSendWithoutId),
+    });
     } else {
       res = await fetch(`${API_URL}/tareas`, {
         method: "POST",
