@@ -111,7 +111,9 @@ function App() {
       });
       setMostrarFormulario(false);
     } else {
-      alert("Error al crear o actualizar la tarea");
+      const errorText = await res.text();
+      alert("Error al crear o actualizar la tarea:\n" + errorText);
+      console.error("Error detallado:", errorText);
     }
   };
 
