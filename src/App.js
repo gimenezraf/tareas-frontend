@@ -22,6 +22,8 @@ function App() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [tareaEditando, setTareaEditando] = useState(null);
+  const [orden, setOrden] = useState("fecha_limite_acto");
+  const [ordenDescendente, setOrdenDescendente] = useState(false);
 
   useEffect(() => {
     fetch(`${API_URL}/tareas`)
@@ -158,7 +160,8 @@ function App() {
     return diferencia <= 2 && diferencia >= 0;
   };
 
-  const tareasFiltradas = tareas.filter((t) => {
+  const tareasFiltradas = tareas
+  .filter((t) => {
     const coincideCliente =
       filtros.cliente === "" ||
       t.cliente.toLowerCase().includes(filtros.cliente.toLowerCase());
@@ -167,11 +170,28 @@ function App() {
     const coincideEstado = filtros.estado === "" || t.estado === filtros.estado;
 
     return coincideCliente && coincideTipo && coincideEstado;
+  })
+  .sort((a, b) => {
+    let campoA = a[orden];
+    let campoB = b[orden];
+
+    // Si el campo es una fecha, convertir a Date
+    if (orden.includes("fecha") && campoA && campoB) {
+      campoA = new Date(campoA);
+      campoB = new Date(campoB);
+    } else {
+      campoA = campoA?.toString().toLowerCase() || "";
+      campoB = campoB?.toString().toLowerCase() || "";
+    }
+
+    if (campoA < campoB) return ordenDescendente ? 1 : -1;
+    if (campoA > campoB) return ordenDescendente ? -1 : 1;
+    return 0;
   });
 
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>Organizador de tareas</h1>
+      <h1>ORGANIZADOR DE TAREAS</h1>
       <button
         onClick={() => {
           setMostrarFormulario(!mostrarFormulario);
@@ -246,6 +266,28 @@ function App() {
           <option value="en curso">En curso</option>
           <option value="finalizada">Finalizada</option>
         </select>
+      </div>
+
+      <div style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+        <label>Ordenar por:</label>
+        <select value={orden} onChange={(e) => setOrden(e.target.value)}>
+          <option value="fecha_limite_acto">Fecha límite</option>
+          <option value="cliente">Cliente</option>
+          <option value="estado">Estado</option>
+        </select>
+          <button
+            onClick={() => setOrdenDescendente(!ordenDescendente)}
+            style={{
+            padding: "0.4rem 0.8rem",
+            backgroundColor: "#1976d2",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+    }}
+  >
+        {ordenDescendente ? "⬇️ Descendente" : "⬆️ Ascendente"}
+          </button>
       </div>
 
       <h2 style={{ textAlign: "center" }}>Listado de tareas</h2>
