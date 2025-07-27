@@ -4,6 +4,11 @@ const API_URL = "https://tareas-api-c5x4.onrender.com";
 
 function App() {
   const [tareas, setTareas] = useState([]);
+  const [fechaHistorial, setFechaHistorial] = useState({});
+  // Estados para edición de eventos del historial
+  const [eventoEditando, setEventoEditando] = useState(null);
+  const [edicionDescripcion, setEdicionDescripcion] = useState("");
+  const [edicionFecha, setEdicionFecha] = useState("");
   const [formData, setFormData] = useState({
     cliente: "",
     asunto: "",
@@ -26,16 +31,39 @@ function App() {
   const [ordenDescendente, setOrdenDescendente] = useState(false);
   const [historialVisible, setHistorialVisible] = useState({});
   const [historialesVisibles, setHistorialesVisibles] = useState({});
+  // Función para guardar la edición de un evento del historial
+  const guardarEdicionEvento = async (eventoId, tareaId) => {
+    try {
+      const res = await fetch(`${API_URL}/historial/${eventoId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ descripcion: edicionDescripcion, fecha: edicionFecha }),
+      });
+      if (!res.ok) throw new Error("Error al editar evento");
+      const actualizado = await res.json();
+      setHistorialVisible((prev) => ({
+        ...prev,
+        [tareaId]: prev[tareaId].map((ev) => (ev.id === eventoId ? actualizado : ev)),
+      }));
+      setEventoEditando(null);
+      setEdicionDescripcion("");
+      setEdicionFecha("");
+    } catch (err) {
+      console.error("Error al guardar edición:", err);
+      alert("No se pudo editar el evento.");
+    }
+  };
   // Permite agregar un evento al historial de una tarea
   const agregarHistorial = async (tareaId) => {
     const descripcion = nuevoHistorial[tareaId];
+    const fecha = fechaHistorial[tareaId];
     if (!descripcion || descripcion.trim() === "") return;
 
     try {
       const res = await fetch(`${API_URL}/tareas/${tareaId}/historial`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ descripcion }),
+        body: JSON.stringify({ descripcion, fecha }),
       });
 
       if (!res.ok) throw new Error("Error al agregar evento");
@@ -48,6 +76,11 @@ function App() {
       }));
 
       setNuevoHistorial((prev) => ({
+        ...prev,
+        [tareaId]: "",
+      }));
+
+      setFechaHistorial((prev) => ({
         ...prev,
         [tareaId]: "",
       }));
@@ -88,6 +121,9 @@ function App() {
 
   const handleHistorialChange = (tareaId, value) => {
     setNuevoHistorial({ ...nuevoHistorial, [tareaId]: value });
+  };
+  const handleFechaHistorialChange = (tareaId, fecha) => {
+    setFechaHistorial({ ...fechaHistorial, [tareaId]: fecha });
   };
 
   const handleFiltroChange = (e) => {
@@ -507,7 +543,46 @@ function App() {
                   <ul>
                     {historialVisible[t.id]?.map((h) => (
                       <li key={h.id}>
-                        <strong>{new Date(h.fecha).toLocaleDateString()}</strong>: {h.descripcion}
+                        {eventoEditando === h.id ? (
+                          <>
+                            <input
+                              type="text"
+                              value={edicionDescripcion}
+                              onChange={(e) => setEdicionDescripcion(e.target.value)}
+                              style={{ width: "60%", marginBottom: "0.3rem" }}
+                            />
+                            <input
+                              type="date"
+                              value={edicionFecha}
+                              onChange={(e) => setEdicionFecha(e.target.value)}
+                              style={{ marginBottom: "0.3rem" }}
+                            />
+                            <button onClick={() => guardarEdicionEvento(h.id, t.id)}>💾 Guardar</button>
+                            <button onClick={() => setEventoEditando(null)}>✖ Cancelar</button>
+                          </>
+                        ) : (
+                          <>
+                            <strong>{new Date(h.fecha).toLocaleDateString()}</strong>: {h.descripcion}
+                            <button
+                              onClick={() => {
+                                setEventoEditando(h.id);
+                                setEdicionDescripcion(h.descripcion);
+                                setEdicionFecha(h.fecha);
+                              }}
+                              style={{
+                                marginLeft: "0.5rem",
+                                fontSize: "0.8rem",
+                                padding: "0.2rem 0.4rem",
+                                backgroundColor: "#ffc107",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                              }}
+                            >
+                              ✏️ Editar
+                            </button>
+                          </>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -520,6 +595,18 @@ function App() {
                       style={{
                         width: "100%",
                         padding: "0.5rem",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                        fontSize: "0.9rem",
+                      }}
+                    />
+                    <input
+                      type="date"
+                      value={fechaHistorial[t.id] || ""}
+                      onChange={(e) => handleFechaHistorialChange(t.id, e.target.value)}
+                      style={{
+                        marginTop: "0.5rem",
+                        padding: "0.3rem",
                         borderRadius: "4px",
                         border: "1px solid #ccc",
                         fontSize: "0.9rem",
