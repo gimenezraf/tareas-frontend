@@ -24,6 +24,8 @@ function App() {
   const [tareaEditando, setTareaEditando] = useState(null);
   const [orden, setOrden] = useState("fecha_limite_acto");
   const [ordenDescendente, setOrdenDescendente] = useState(false);
+  const [historialVisible, setHistorialVisible] = useState({});
+  const [nuevoHistorial, setNuevoHistorial] = useState({});
 
   useEffect(() => {
     fetch(`${API_URL}/tareas`)
@@ -51,6 +53,10 @@ function App() {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
+  };
+
+  const handleHistorialChange = (tareaId, value) => {
+    setNuevoHistorial({ ...nuevoHistorial, [tareaId]: value });
   };
 
   const handleFiltroChange = (e) => {
@@ -139,6 +145,30 @@ function App() {
       }
     } catch (error) {
       console.error("Error al eliminar:", error);
+    }
+  };
+
+  const toggleHistorial = async (tareaId) => {
+    if (historialVisible[tareaId]) {
+      // Si ya está visible, lo ocultamos
+      setHistorialVisible((prev) => {
+        const copia = { ...prev };
+        delete copia[tareaId];
+        return copia;
+      });
+    } else {
+      try {
+        const res = await fetch(`${API_URL}/tareas/${tareaId}/historial`);
+        if (!res.ok) throw new Error("Error al obtener el historial");
+        const historial = await res.json();
+        setHistorialVisible((prev) => ({
+          ...prev,
+          [tareaId]: historial,
+        }));
+    }  catch (err) {
+        console.error("Error al cargar historial:", err);
+        alert("No se pudo cargar el historial.");
+      }
     }
   };
 
@@ -412,6 +442,76 @@ function App() {
           >
             ✏️ Editar
           </button>
+
+          <button
+  onClick={() => toggleHistorial(t.id)}
+  style={{
+    marginTop: "0.5rem",
+    marginLeft: "0.5rem",
+    padding: "0.25rem 0.5rem",
+    backgroundColor: "#1976d2",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "0.8rem",
+  }}
+>
+  {historialesVisibles[t.id] ? "🔽 Ocultar historial" : "📜 Ver historial"}
+</button>
+
+{historialesVisibles[t.id] && (
+  <div
+    style={{
+      marginTop: "0.5rem",
+      paddingLeft: "1rem",
+      borderLeft: "2px solid #1976d2",
+    }}
+  >
+    <h4>Historial:</h4>
+    {Array.isArray(historialesVisibles[t.id]) && historialesVisibles[t.id].length === 0 ? (
+      <p style={{ fontStyle: "italic" }}>No hay eventos registrados.</p>
+    ) : (
+      <ul>
+        {historialesVisibles[t.id]?.map((h) => (
+          <li key={h.id}>
+            <strong>{new Date(h.fecha).toLocaleDateString()}</strong>: {h.descripcion}
+          </li>
+        ))}
+      </ul>
+      <div style={{ marginTop: "1rem" }}>
+  <textarea
+    rows="2"
+    placeholder="Agregar nuevo evento..."
+    value={nuevoHistorial[t.id] || ""}
+    onChange={(e) => handleHistorialChange(t.id, e.target.value)}
+    style={{
+      width: "100%",
+      padding: "0.5rem",
+      borderRadius: "4px",
+      border: "1px solid #ccc",
+      fontSize: "0.9rem",
+    }}
+  />
+  <button
+    onClick={() => agregarHistorial(t.id)}
+    style={{
+      marginTop: "0.5rem",
+      padding: "0.3rem 0.7rem",
+      backgroundColor: "#43a047",
+      color: "white",
+      border: "none",
+      borderRadius: "4px",
+      cursor: "pointer",
+      fontSize: "0.8rem",
+    }}
+  >
+    ➕ Agregar evento
+  </button>
+</div>
+    )}
+  </div>
+)}
         </div>
       ))}
     </div>
