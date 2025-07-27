@@ -48,6 +48,7 @@ function App() {
       setEventoEditando(null);
       setEdicionDescripcion("");
       setEdicionFecha("");
+      await obtenerTareas(); // Recarga las tareas para actualizar "última actividad"
     } catch (err) {
       console.error("Error al guardar edición:", err);
       alert("No se pudo editar el evento.");
@@ -84,6 +85,7 @@ function App() {
         ...prev,
         [tareaId]: "",
       }));
+      await obtenerTareas(); // Recarga las tareas para actualizar "última actividad"
     } catch (err) {
       console.error("Error al agregar evento:", err);
       alert("No se pudo agregar el evento.");
@@ -639,3 +641,24 @@ function App() {
 }
 
 export default App;
+  // Función para recargar tareas desde la API y actualizar el estado
+  const obtenerTareas = async () => {
+    try {
+      const res = await fetch(`${API_URL}/tareas`);
+      const data = await res.json();
+      const hoy = new Date();
+      const tareasConVencimiento = data.map((t) => {
+        const fechaLimite = new Date(t.fecha_limite_acto);
+        return {
+          ...t,
+          vencida: fechaLimite < hoy.setHours(0, 0, 0, 0),
+        };
+      });
+      const tareasOrdenadas = tareasConVencimiento.sort(
+        (a, b) => new Date(a.fecha_limite_acto) - new Date(b.fecha_limite_acto)
+      );
+      setTareas(tareasOrdenadas);
+    } catch (err) {
+      console.error("Error al recargar tareas:", err);
+    }
+  };
