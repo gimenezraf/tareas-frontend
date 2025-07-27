@@ -488,10 +488,10 @@ function App() {
               fontSize: "0.8rem",
             }}
           >
-            {historialesVisibles[t.id] ? "🔽 Ocultar historial" : "📜 Ver historial"}
+            {historialVisible[t.id] ? "🔽 Ocultar historial" : "📜 Ver historial"}
           </button>
 
-          {historialesVisibles[t.id] && (
+          {historialVisible[t.id] && (
             <div
               style={{
                 marginTop: "0.5rem",
@@ -500,12 +500,12 @@ function App() {
               }}
             >
               <h4>Historial:</h4>
-              {Array.isArray(historialesVisibles[t.id]) && historialesVisibles[t.id].length === 0 ? (
+              {Array.isArray(historialVisible[t.id]) && historialesVisibles[t.id]?.length === 0 ? (
                 <p style={{ fontStyle: "italic" }}>No hay eventos registrados.</p>
               ) : (
                 <div>
                   <ul>
-                    {historialesVisibles[t.id]?.map((h) => (
+                    {historialVisible[t.id]?.map((h) => (
                       <li key={h.id}>
                         <strong>{new Date(h.fecha).toLocaleDateString()}</strong>: {h.descripcion}
                       </li>
