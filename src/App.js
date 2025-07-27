@@ -49,6 +49,18 @@ function App() {
       setEdicionDescripcion("");
       setEdicionFecha("");
       await obtenerTareas(); // Recarga las tareas para actualizar "última actividad"
+      setTareas((prevTareas) =>
+        prevTareas.map((t) => {
+          if (t.id === tareaId && new Date(edicionFecha) > new Date(t.fecha_ultima_actividad)) {
+            return {
+              ...t,
+              ultima_actividad: edicionDescripcion,
+              fecha_ultima_actividad: edicionFecha,
+            };
+          }
+          return t;
+        })
+      );
     } catch (err) {
       console.error("Error al guardar edición:", err);
       alert("No se pudo editar el evento.");
@@ -86,6 +98,18 @@ function App() {
         [tareaId]: "",
       }));
       await obtenerTareas(); // Recarga las tareas para actualizar "última actividad"
+      setTareas((prevTareas) =>
+        prevTareas.map((t) => {
+          if (t.id === tareaId && new Date(fecha) > new Date(t.fecha_ultima_actividad)) {
+            return {
+              ...t,
+              ultima_actividad: descripcion,
+              fecha_ultima_actividad: fecha,
+            };
+          }
+          return t;
+        })
+      );
     } catch (err) {
       console.error("Error al agregar evento:", err);
       alert("No se pudo agregar el evento.");
