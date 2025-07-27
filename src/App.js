@@ -25,6 +25,37 @@ function App() {
   const [orden, setOrden] = useState("fecha_limite_acto");
   const [ordenDescendente, setOrdenDescendente] = useState(false);
   const [historialVisible, setHistorialVisible] = useState({});
+  const [historialesVisibles, setHistorialesVisibles] = useState({});
+  // Permite agregar un evento al historial de una tarea
+  const agregarHistorial = async (tareaId) => {
+    const descripcion = nuevoHistorial[tareaId];
+    if (!descripcion || descripcion.trim() === "") return;
+
+    try {
+      const res = await fetch(`${API_URL}/tareas/${tareaId}/historial`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ descripcion }),
+      });
+
+      if (!res.ok) throw new Error("Error al agregar evento");
+
+      const nuevoEvento = await res.json();
+
+      setHistorialesVisibles((prev) => ({
+        ...prev,
+        [tareaId]: [...(prev[tareaId] || []), nuevoEvento],
+      }));
+
+      setNuevoHistorial((prev) => ({
+        ...prev,
+        [tareaId]: "",
+      }));
+    } catch (err) {
+      console.error("Error al agregar evento:", err);
+      alert("No se pudo agregar el evento.");
+    }
+  };
   const [nuevoHistorial, setNuevoHistorial] = useState({});
 
   useEffect(() => {
@@ -460,60 +491,60 @@ function App() {
             {historialesVisibles[t.id] ? "🔽 Ocultar historial" : "📜 Ver historial"}
           </button>
 
-            {historialesVisibles[t.id] && (
-          <div
-            style={{
-              marginTop: "0.5rem",
-              paddingLeft: "1rem",
-              borderLeft: "2px solid #1976d2",
-            }}
-          >
-          <h4>Historial:</h4>
-            {Array.isArray(historialesVisibles[t.id]) && historialesVisibles[t.id].length === 0 ? (
-              <p style={{ fontStyle: "italic" }}>No hay eventos registrados.</p>
-            ) : (
-              <div>
-                <ul>
-                  {historialesVisibles[t.id]?.map((h) => (
-                    <li key={h.id}>
-                      <strong>{new Date(h.fecha).toLocaleDateString()}</strong>: {h.descripcion}
-                    </li>
-                  ))}
-                </ul>
-                <div style={{ marginTop: "1rem" }}>
-                  <textarea
-                    rows="2"
-                    placeholder="Agregar nuevo evento..."
-                    value={nuevoHistorial[t.id] || ""}
-                    onChange={(e) => handleHistorialChange(t.id, e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "0.5rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                      fontSize: "0.9rem",
-                    }}
-                  />
-                  <button
-                    onClick={() => agregarHistorial(t.id)}
-                    style={{
-                      marginTop: "0.5rem",
-                      padding: "0.3rem 0.7rem",
-                      backgroundColor: "#43a047",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    ➕ Agregar evento
-                  </button>
+          {historialesVisibles[t.id] && (
+            <div
+              style={{
+                marginTop: "0.5rem",
+                paddingLeft: "1rem",
+                borderLeft: "2px solid #1976d2",
+              }}
+            >
+              <h4>Historial:</h4>
+              {Array.isArray(historialesVisibles[t.id]) && historialesVisibles[t.id].length === 0 ? (
+                <p style={{ fontStyle: "italic" }}>No hay eventos registrados.</p>
+              ) : (
+                <div>
+                  <ul>
+                    {historialesVisibles[t.id]?.map((h) => (
+                      <li key={h.id}>
+                        <strong>{new Date(h.fecha).toLocaleDateString()}</strong>: {h.descripcion}
+                      </li>
+                    ))}
+                  </ul>
+                  <div style={{ marginTop: "1rem" }}>
+                    <textarea
+                      rows="2"
+                      placeholder="Agregar nuevo evento..."
+                      value={nuevoHistorial[t.id] || ""}
+                      onChange={(e) => handleHistorialChange(t.id, e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "0.5rem",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                        fontSize: "0.9rem",
+                      }}
+                    />
+                    <button
+                      onClick={() => agregarHistorial(t.id)}
+                      style={{
+                        marginTop: "0.5rem",
+                        padding: "0.3rem 0.7rem",
+                        backgroundColor: "#43a047",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      ➕ Agregar evento
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-  </div>
-)}
+              )}
+            </div>
+          )}
         </div>
       ))}
     </div>
