@@ -93,6 +93,28 @@ function App() {
   };
   const [nuevoHistorial, setNuevoHistorial] = useState({});
 
+  // Función para recargar tareas desde la API y actualizar el estado
+  const obtenerTareas = async () => {
+    try {
+      const res = await fetch(`${API_URL}/tareas`);
+      const data = await res.json();
+      const hoy = new Date();
+      const tareasConVencimiento = data.map((t) => {
+        const fechaLimite = new Date(t.fecha_limite_acto);
+        return {
+          ...t,
+          vencida: fechaLimite < hoy.setHours(0, 0, 0, 0),
+        };
+      });
+      const tareasOrdenadas = tareasConVencimiento.sort(
+        (a, b) => new Date(a.fecha_limite_acto) - new Date(b.fecha_limite_acto)
+      );
+      setTareas(tareasOrdenadas);
+    } catch (err) {
+      console.error("Error al recargar tareas:", err);
+    }
+  };
+
   useEffect(() => {
     fetch(`${API_URL}/tareas`)
       .then((res) => res.json())
@@ -641,24 +663,3 @@ function App() {
 }
 
 export default App;
-  // Función para recargar tareas desde la API y actualizar el estado
-  const obtenerTareas = async () => {
-    try {
-      const res = await fetch(`${API_URL}/tareas`);
-      const data = await res.json();
-      const hoy = new Date();
-      const tareasConVencimiento = data.map((t) => {
-        const fechaLimite = new Date(t.fecha_limite_acto);
-        return {
-          ...t,
-          vencida: fechaLimite < hoy.setHours(0, 0, 0, 0),
-        };
-      });
-      const tareasOrdenadas = tareasConVencimiento.sort(
-        (a, b) => new Date(a.fecha_limite_acto) - new Date(b.fecha_limite_acto)
-      );
-      setTareas(tareasOrdenadas);
-    } catch (err) {
-      console.error("Error al recargar tareas:", err);
-    }
-  };
