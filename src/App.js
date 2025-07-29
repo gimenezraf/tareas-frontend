@@ -5,6 +5,8 @@ const API_URL = "https://tareas-api-c5x4.onrender.com";
 function App() {
   const [tareas, setTareas] = useState([]);
   const [fechaHistorial, setFechaHistorial] = useState({});
+  const [etapaProcesal, setEtapaProcesal] = useState({});
+  const [fechaLimiteEtapa, setFechaLimiteEtapa] = useState({});
   // Estados para edición de eventos del historial
   const [eventoEditando, setEventoEditando] = useState(null);
   const [edicionDescripcion, setEdicionDescripcion] = useState("");
@@ -13,6 +15,7 @@ function App() {
     cliente: "",
     asunto: "",
     tipo: "judicial",
+    etapa_procesal_inicial: "",
     fecha_inicio: "",
     ultima_actividad: "",
     fecha_ultima_actividad: "",
@@ -76,7 +79,12 @@ function App() {
       const res = await fetch(`${API_URL}/tareas/${tareaId}/historial`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ descripcion, fecha }),
+        body: JSON.stringify({
+          descripcion,
+          fecha,
+          etapa_procesal: etapaProcesal[tareaId],
+          fecha_limite: fechaLimiteEtapa[tareaId],
+        }),
       });
 
       if (!res.ok) throw new Error("Error al agregar evento");
@@ -97,6 +105,8 @@ function App() {
         ...prev,
         [tareaId]: "",
       }));
+      setEtapaProcesal((prev) => ({ ...prev, [tareaId]: "" }));
+      setFechaLimiteEtapa((prev) => ({ ...prev, [tareaId]: "" }));
       await obtenerTareas(); // Recarga las tareas para actualizar "última actividad"
       setTareas((prevTareas) =>
         prevTareas.map((t) => {
@@ -213,6 +223,25 @@ function App() {
 
     if (res.ok) {
       const nuevaTarea = await res.json();
+
+      // Si es una nueva tarea (no edición) y es judicial, crea el evento inicial en el historial
+      if (!modoEdicion && nuevaTarea.tipo === "judicial") {
+      const etapaInicial = formData.etapa_procesal_inicial || "Demanda";
+      try {
+    await fetch(`${API_URL}/tareas/${nuevaTarea.id}/historial`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        descripcion: etapaInicial,
+        fecha: nuevaTarea.fecha_inicio || new Date().toISOString().split("T")[0],
+        etapa_procesal: etapaInicial,
+        fecha_limite: nuevaTarea.fecha_limite_acto || "",
+        }),
+          });
+        } catch (err) {
+          console.error("Error al crear evento inicial:", err);
+        }
+      }
 
       if (modoEdicion) {
         setTareas(tareas.map((t) => (t.id === tareaEditando.id ? nuevaTarea : t)));
@@ -423,6 +452,10 @@ function App() {
           <div>
             <label>Fecha límite para el acto procesal:</label>
             <input type="date" name="fecha_limite_acto" value={formData.fecha_limite_acto} onChange={handleChange} />
+          </div>
+          <div>
+            <label>Etapa procesal inicial:</label>
+            <input name="etapa_procesal_inicial" value={formData.etapa_procesal_inicial} onChange={handleChange} />
           </div>
         </>
       )}
@@ -652,6 +685,37 @@ function App() {
                       type="date"
                       value={fechaHistorial[t.id] || ""}
                       onChange={(e) => handleFechaHistorialChange(t.id, e.target.value)}
+                      style={{
+                        marginTop: "0.5rem",
+                        padding: "0.3rem",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                        fontSize: "0.9rem",
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Etapa procesal"
+                      value={etapaProcesal[t.id] || ""}
+                      onChange={(e) =>
+                        setEtapaProcesal((prev) => ({ ...prev, [t.id]: e.target.value }))
+                      }
+                      style={{
+                        marginTop: "0.5rem",
+                        padding: "0.3rem",
+                        borderRadius: "4px",
+                        border: "1px solid #ccc",
+                        fontSize: "0.9rem",
+                        width: "100%",
+                      }}
+                    />
+                    <input
+                      type="date"
+                      placeholder="Fecha límite"
+                      value={fechaLimiteEtapa[t.id] || ""}
+                      onChange={(e) =>
+                        setFechaLimiteEtapa((prev) => ({ ...prev, [t.id]: e.target.value }))
+                      }
                       style={{
                         marginTop: "0.5rem",
                         padding: "0.3rem",
