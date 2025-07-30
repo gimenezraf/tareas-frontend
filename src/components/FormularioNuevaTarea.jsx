@@ -104,7 +104,7 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-semibold mb-6">Nueva Tarea</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
         <div>
           <label className="block mb-1 font-medium">Cliente</label>

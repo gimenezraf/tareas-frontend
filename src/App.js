@@ -229,6 +229,7 @@ function App() {
 
     if (res.ok) {
       const nuevaTarea = await res.json();
+      nuevaTarea.tarea_pendiente = formData.tarea_pendiente;
 
       // Si es una nueva tarea (no edición) y es judicial, crea el evento inicial en el historial
       if (!modoEdicion && nuevaTarea.tipo === "judicial") {
