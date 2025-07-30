@@ -10,6 +10,16 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
   const [rol, setRol] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [visible, setVisible] = useState(false);
+  // Nuevos estados
+  const [tareaPendiente, setTareaPendiente] = useState("");
+  const [ultimaActividad, setUltimaActividad] = useState("");
+  const [fechaUltimaActividad, setFechaUltimaActividad] = useState("");
+  const [fechaNotificacion, setFechaNotificacion] = useState("");
+  const [hayPlazoCopias, setHayPlazoCopias] = useState(false);
+  const [fechaLimiteCopias, setFechaLimiteCopias] = useState("");
+  const [diasParaRetirarCopias, setDiasParaRetirarCopias] = useState(0);
+  const [estado, setEstado] = useState("pendiente");
+  const [etapaInicial, setEtapaInicial] = useState("");
 
   const calcularDiferenciaDias = () => {
     if (!fechaLimite) return "";
@@ -26,14 +36,19 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
       cliente,
       asunto,
       tipo: tipoTarea,
+      descripcion: tareaPendiente,
+      estructura_procesal: tipoProceso,
+      rol_procesal: rol,
+      sede_judicial: sede,
+      etapa_inicial: etapaInicial,
       fecha_inicio: new Date().toISOString().split("T")[0],
-      ultima_actividad: "",
-      fecha_ultima_actividad: null,
-      fecha_notificacion: null,
-      dias_para_retirar_copias: 0,
-      fecha_limite_retirar_copias: null,
+      ultima_actividad: ultimaActividad,
+      fecha_ultima_actividad: fechaUltimaActividad || null,
+      fecha_notificacion: fechaNotificacion || null,
+      dias_para_retirar_copias: hayPlazoCopias ? Number(diasParaRetirarCopias) : 0,
+      fecha_limite_retirar_copias: hayPlazoCopias ? fechaLimiteCopias || null : null,
       fecha_limite_acto: fechaLimite || null,
-      estado: "pendiente",
+      estado,
       vencida: false
     };
 
@@ -58,6 +73,15 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
         setSede("");
         setRol("");
         setFechaLimite("");
+        setTareaPendiente("");
+        setUltimaActividad("");
+        setFechaUltimaActividad("");
+        setFechaNotificacion("");
+        setHayPlazoCopias(false);
+        setFechaLimiteCopias("");
+        setDiasParaRetirarCopias(0);
+        setEstado("pendiente");
+        setEtapaInicial("");
         if (onTareaCreada) onTareaCreada();
       } else {
         setMensaje("❌ Error al guardar la tarea");
@@ -94,6 +118,40 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
         <option value="no_judicial">No Judicial</option>
       </select>
 
+      {/* Campos adicionales debajo de Asunto */}
+      <label>Tarea pendiente</label>
+      <input type="text" value={tareaPendiente} onChange={(e) => setTareaPendiente(e.target.value)} placeholder="Ej: Redactar demanda" />
+
+      <label>Última actividad realizada</label>
+      <input type="text" value={ultimaActividad} onChange={(e) => setUltimaActividad(e.target.value)} placeholder="Ej: Entrega de demanda" />
+
+      <label>Fecha de última actividad</label>
+      <input type="date" value={fechaUltimaActividad} onChange={(e) => setFechaUltimaActividad(e.target.value)} />
+
+      <label>Fecha de notificación</label>
+      <input type="date" value={fechaNotificacion} onChange={(e) => setFechaNotificacion(e.target.value)} />
+
+      <label>
+        <input type="checkbox" checked={hayPlazoCopias} onChange={(e) => setHayPlazoCopias(e.target.checked)} />
+        ¿Hay plazo para copias?
+      </label>
+
+      {hayPlazoCopias && (
+        <>
+          <label>Fecha límite para copias</label>
+          <input type="date" value={fechaLimiteCopias} onChange={(e) => setFechaLimiteCopias(e.target.value)} />
+
+          <label>Días para retirar copias</label>
+          <input type="number" value={diasParaRetirarCopias} onChange={(e) => setDiasParaRetirarCopias(e.target.value)} />
+        </>
+      )}
+
+      <label>Estado</label>
+      <select value={estado} onChange={(e) => setEstado(e.target.value)}>
+        <option value="pendiente">Pendiente</option>
+        <option value="completado">Completado</option>
+      </select>
+
       {tipoTarea === "judicial" && (
         <>
           <label>Tipo de proceso</label>
@@ -114,6 +172,10 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
             <option value="actor">Parte actora</option>
             <option value="demandado">Parte demandada</option>
           </select>
+
+          {/* Etapa procesal inicial */}
+          <label>Etapa procesal inicial</label>
+          <input type="text" value={etapaInicial} onChange={(e) => setEtapaInicial(e.target.value)} placeholder="Ej: Demanda" />
         </>
       )}
 
