@@ -469,6 +469,7 @@ const iniciarEdicion = (tarea) => {
           {/* Mostrar campos solo si tipo === "judicial" */}
           {formData.tipo === "judicial" && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "1rem" }}>
+              {/* 4b. Tipo de proceso judicial */}
               <div>
                 <label>Tipo de proceso judicial:</label>
                 <select
@@ -484,6 +485,7 @@ const iniciarEdicion = (tarea) => {
                   <option value="proceso_penal">Proceso penal</option>
                 </select>
               </div>
+              {/* (opcional oculto) */}
               <div style={{ display: "none" }}>
                 <label>Rol procesal:</label>
                 <select name="rol_procesal" value={formData.rol_procesal} onChange={handleChange}>
@@ -492,22 +494,58 @@ const iniciarEdicion = (tarea) => {
                   <option value="demandado">Parte demandada</option>
                 </select>
               </div>
+              {/* 4c. Etapa procesal inicial */}
+              <div>
+                <label>Etapa procesal inicial:</label>
+                <input
+                  name="etapa_procesal_inicial"
+                  value={formData.etapa_procesal_inicial}
+                  onChange={handleChange}
+                />
+              </div>
               <div>
                 <label>Fecha de notificación judicial:</label>
                 <input type="date" name="fecha_notificacion" value={formData.fecha_notificacion} onChange={handleChange} />
               </div>
-              <div>
-                <label>Días para retirar copias:</label>
-                <input type="number" name="dias_para_retirar_copias" value={formData.dias_para_retirar_copias} onChange={handleChange} />
+              {/* Reemplazo: ¿Aplica retiro de copias? */}
+              <div style={{ gridColumn: "1 / -1" }}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={formData.dias_para_retirar_copias !== ""}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        dias_para_retirar_copias: e.target.checked ? "3" : "",
+                        fecha_limite_retirar_copias: e.target.checked ? formData.fecha_limite_retirar_copias : "",
+                      });
+                    }}
+                  />
+                  ¿Aplica retiro de copias?
+                </label>
               </div>
-              <div>
-                <label>Fecha límite para retirar copias:</label>
-                <input type="date" name="fecha_limite_retirar_copias" value={formData.fecha_limite_retirar_copias} onChange={handleChange} />
-              </div>
-              <div>
-                <label>Etapa procesal inicial:</label>
-                <input name="etapa_procesal_inicial" value={formData.etapa_procesal_inicial} onChange={handleChange} />
-              </div>
+              {formData.dias_para_retirar_copias !== "" && (
+                <>
+                  <div>
+                    <label>Días para retirar copias:</label>
+                    <input
+                      type="number"
+                      name="dias_para_retirar_copias"
+                      value={formData.dias_para_retirar_copias}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div>
+                    <label>Fecha límite para retirar copias:</label>
+                    <input
+                      type="date"
+                      name="fecha_limite_retirar_copias"
+                      value={formData.fecha_limite_retirar_copias}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -598,7 +636,7 @@ const iniciarEdicion = (tarea) => {
 
           <span><strong>Última actividad:</strong> {t.ultima_actividad} ({t.fecha_ultima_actividad})</span><br />
           <span><strong>Tarea pendiente:</strong> {t.tarea_pendiente}</span><br />
-          <span><strong>Fecha límite acto:</strong> {t.fecha_limite_acto}</span><br />
+            <span><strong>Fecha límite:</strong> {t.fecha_limite_acto}</span><br />
 
           <button
             onClick={() => handleEliminar(t.id)}
