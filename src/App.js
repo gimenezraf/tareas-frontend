@@ -7,15 +7,18 @@ function App() {
   const [fechaHistorial, setFechaHistorial] = useState({});
   const [etapaProcesal, setEtapaProcesal] = useState({});
   const [fechaLimiteEtapa, setFechaLimiteEtapa] = useState({});
-  // Estados para edición de eventos del historial
+// Estados para edición de eventos del historial
   const [eventoEditando, setEventoEditando] = useState(null);
   const [edicionDescripcion, setEdicionDescripcion] = useState("");
   const [edicionFecha, setEdicionFecha] = useState("");
   const [formData, setFormData] = useState({
     cliente: "",
     asunto: "",
+    tarea_pendiente: "",
     tipo: "judicial",
+    estructura_procesal: "",
     etapa_procesal_inicial: "",
+    rol_procesal: "",
     fecha_inicio: "",
     ultima_actividad: "",
     fecha_ultima_actividad: "",
@@ -200,6 +203,7 @@ function App() {
       dias_para_retirar_copias: formData.dias_para_retirar_copias
         ? parseInt(formData.dias_para_retirar_copias)
         : null,
+      tarea_pendiente: formData.tarea_pendiente,
     };
 
     let res;
@@ -254,6 +258,7 @@ function App() {
       setFormData({
         cliente: "",
         asunto: "",
+        tarea_pendiente: "",
         tipo: "judicial",
         fecha_inicio: "",
         ultima_actividad: "",
@@ -316,15 +321,18 @@ function App() {
     }
   };
 
-  const iniciarEdicion = (tarea) => {
-    setModoEdicion(true);
-    setTareaEditando(tarea);
-    setMostrarFormulario(true);
-    setFormData({
-      ...tarea,
-      dias_para_retirar_copias: tarea.dias_para_retirar_copias || "",
-    });
-  };
+const iniciarEdicion = (tarea) => {
+  setModoEdicion(true);
+  setTareaEditando(tarea);
+  setMostrarFormulario(true);
+  setFormData({
+    ...tarea,
+    dias_para_retirar_copias: tarea.dias_para_retirar_copias || "",
+    estructura_procesal: tarea.estructura_procesal || "",
+    rol_procesal: tarea.rol_procesal || "",
+    tarea_pendiente: tarea.tarea_pendiente || "",
+  });
+};
 
   const esProximaAVencer = (fechaLimite) => {
     if (!fechaLimite) return false;
@@ -412,6 +420,10 @@ function App() {
         <label>Asunto:</label>
         <input name="asunto" value={formData.asunto} onChange={handleChange} required />
       </div>
+      <div>
+        <label>Tarea pendiente:</label>
+        <input name="tarea_pendiente" value={formData.tarea_pendiente} onChange={handleChange} required />
+      </div>
 
       <div>
         <label>Tipo de tarea:</label>
@@ -437,6 +449,29 @@ function App() {
 
       {formData.tipo === "judicial" && (
         <>
+          <div>
+            <label>Tipo de proceso judicial:</label>
+              <select
+                name="estructura_procesal"
+                value={formData.estructura_procesal}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccionar...</option>
+                <option value="proceso_ordinario">Proceso ordinario</option>
+                <option value="proceso_laboral">Proceso laboral</option>
+                <option value="proceso_monitorio">Proceso monitorio</option>
+                <option value="proceso_penal">Proceso penal</option>
+              </select>
+          </div>
+          <div style={{ display: "none" }}>
+            <label>Rol procesal:</label>
+              <select name="rol_procesal" value={formData.rol_procesal} onChange={handleChange}>
+                <option value="">Seleccionar...</option>
+                <option value="actor">Parte actora</option>
+                <option value="demandado">Parte demandada</option>
+              </select>
+          </div>
           <div>
             <label>Fecha de notificación judicial:</label>
             <input type="date" name="fecha_notificacion" value={formData.fecha_notificacion} onChange={handleChange} />
@@ -556,6 +591,7 @@ function App() {
           </div>
 
           <span><strong>Última actividad:</strong> {t.ultima_actividad} ({t.fecha_ultima_actividad})</span><br />
+          <span><strong>Tarea pendiente:</strong> {t.tarea_pendiente}</span><br />
           <span><strong>Fecha límite acto:</strong> {t.fecha_limite_acto}</span><br />
 
           <button
