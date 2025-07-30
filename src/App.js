@@ -494,8 +494,10 @@ const iniciarEdicion = (tarea) => {
           </div>
 
           <span><strong>Última actividad:</strong> {t.ultima_actividad} ({t.fecha_ultima_actividad})</span><br />
-          <span><strong>Tarea pendiente:</strong> {t.tarea_pendiente}</span><br />
-            <span><strong>Fecha límite:</strong> {t.fecha_limite_acto}</span><br />
+          {t.tarea_pendiente && (
+            <p><strong>Tarea pendiente:</strong> {t.tarea_pendiente}</p>
+          )}
+          <span><strong>Fecha límite:</strong> {t.fecha_limite_acto}</span><br />
 
           <button
             onClick={() => handleEliminar(t.id)}

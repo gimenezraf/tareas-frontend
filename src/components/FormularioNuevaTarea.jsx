@@ -104,7 +104,7 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
       <h2 className="text-2xl font-semibold mb-6">Nueva Tarea</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
         <div>
           <label className="block mb-1 font-medium">Cliente</label>
@@ -152,7 +152,12 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
 
         <div>
           <label className="block mb-1 font-medium">Fecha de inicio</label>
-          <input type="date" value={new Date().toISOString().split("T")[0]} disabled className="w-full border rounded px-3 py-2 bg-gray-100" />
+          <input
+            type="date"
+            value={fechaUltimaActividad || new Date().toISOString().split("T")[0]}
+            onChange={(e) => setFechaUltimaActividad(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+          />
         </div>
 
         <div>
