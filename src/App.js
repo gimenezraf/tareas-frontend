@@ -412,19 +412,22 @@ const iniciarEdicion = (tarea) => {
           <h3>{modoEdicion ? "Editar Tarea" : "Agregar Nueva Tarea"}</h3>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            {/* 1. Cliente */}
             <div>
               <label>Cliente:</label>
               <input name="cliente" value={formData.cliente} onChange={handleChange} required />
             </div>
+            {/* 2. Asunto */}
             <div>
               <label>Asunto:</label>
               <input name="asunto" value={formData.asunto} onChange={handleChange} required />
             </div>
+            {/* 3. Tarea pendiente */}
             <div>
               <label>Tarea pendiente:</label>
               <input name="tarea_pendiente" value={formData.tarea_pendiente} onChange={handleChange} required />
             </div>
-
+            {/* 4. Tipo de tarea */}
             <div>
               <label>Tipo de tarea:</label>
               <select name="tipo" value={formData.tipo} onChange={handleChange}>
@@ -432,70 +435,27 @@ const iniciarEdicion = (tarea) => {
                 <option value="no_judicial">No judicial</option>
               </select>
             </div>
-
+            {/* 5. Fecha de inicio */}
             <div>
               <label>Fecha de inicio:</label>
               <input type="date" name="fecha_inicio" value={formData.fecha_inicio} onChange={handleChange} />
             </div>
-
+            {/* 6. Última actividad realizada */}
             <div>
               <label>Última actividad realizada:</label>
               <input name="ultima_actividad" value={formData.ultima_actividad} onChange={handleChange} />
             </div>
+            {/* 7. Fecha de última actividad */}
             <div>
               <label>Fecha de última actividad:</label>
               <input type="date" name="fecha_ultima_actividad" value={formData.fecha_ultima_actividad} onChange={handleChange} />
             </div>
-
-            {/* Mostrar campos solo si tipo === "judicial" */}
-            {formData.tipo === "judicial" && (
-              <>
-                <div>
-                  <label>Tipo de proceso judicial:</label>
-                  <select
-                    name="estructura_procesal"
-                    value={formData.estructura_procesal}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="proceso_ordinario">Proceso ordinario</option>
-                    <option value="proceso_laboral">Proceso laboral</option>
-                    <option value="proceso_monitorio">Proceso monitorio</option>
-                    <option value="proceso_penal">Proceso penal</option>
-                  </select>
-                </div>
-                <div style={{ display: "none" }}>
-                  <label>Rol procesal:</label>
-                  <select name="rol_procesal" value={formData.rol_procesal} onChange={handleChange}>
-                    <option value="">Seleccionar...</option>
-                    <option value="actor">Parte actora</option>
-                    <option value="demandado">Parte demandada</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Fecha de notificación judicial:</label>
-                  <input type="date" name="fecha_notificacion" value={formData.fecha_notificacion} onChange={handleChange} />
-                </div>
-                <div>
-                  <label>Días para retirar copias:</label>
-                  <input type="number" name="dias_para_retirar_copias" value={formData.dias_para_retirar_copias} onChange={handleChange} />
-                </div>
-                <div>
-                  <label>Fecha límite para retirar copias:</label>
-                  <input type="date" name="fecha_limite_retirar_copias" value={formData.fecha_limite_retirar_copias} onChange={handleChange} />
-                </div>
-                <div>
-                  <label>Fecha límite:</label>
-                  <input type="date" name="fecha_limite_acto" value={formData.fecha_limite_acto} onChange={handleChange} />
-                </div>
-                <div>
-                  <label>Etapa procesal inicial:</label>
-                  <input name="etapa_procesal_inicial" value={formData.etapa_procesal_inicial} onChange={handleChange} />
-                </div>
-              </>
-            )}
-
+            {/* 8. Fecha límite */}
+            <div>
+              <label>Fecha límite:</label>
+              <input type="date" name="fecha_limite_acto" value={formData.fecha_limite_acto} onChange={handleChange} />
+            </div>
+            {/* 9. Estado */}
             <div>
               <label>Estado:</label>
               <select name="estado" value={formData.estado} onChange={handleChange}>
@@ -505,6 +465,51 @@ const iniciarEdicion = (tarea) => {
               </select>
             </div>
           </div>
+
+          {/* Mostrar campos solo si tipo === "judicial" */}
+          {formData.tipo === "judicial" && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "1rem" }}>
+              <div>
+                <label>Tipo de proceso judicial:</label>
+                <select
+                  name="estructura_procesal"
+                  value={formData.estructura_procesal}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="proceso_ordinario">Proceso ordinario</option>
+                  <option value="proceso_laboral">Proceso laboral</option>
+                  <option value="proceso_monitorio">Proceso monitorio</option>
+                  <option value="proceso_penal">Proceso penal</option>
+                </select>
+              </div>
+              <div style={{ display: "none" }}>
+                <label>Rol procesal:</label>
+                <select name="rol_procesal" value={formData.rol_procesal} onChange={handleChange}>
+                  <option value="">Seleccionar...</option>
+                  <option value="actor">Parte actora</option>
+                  <option value="demandado">Parte demandada</option>
+                </select>
+              </div>
+              <div>
+                <label>Fecha de notificación judicial:</label>
+                <input type="date" name="fecha_notificacion" value={formData.fecha_notificacion} onChange={handleChange} />
+              </div>
+              <div>
+                <label>Días para retirar copias:</label>
+                <input type="number" name="dias_para_retirar_copias" value={formData.dias_para_retirar_copias} onChange={handleChange} />
+              </div>
+              <div>
+                <label>Fecha límite para retirar copias:</label>
+                <input type="date" name="fecha_limite_retirar_copias" value={formData.fecha_limite_retirar_copias} onChange={handleChange} />
+              </div>
+              <div>
+                <label>Etapa procesal inicial:</label>
+                <input name="etapa_procesal_inicial" value={formData.etapa_procesal_inicial} onChange={handleChange} />
+              </div>
+            </div>
+          )}
 
           <button type="submit" style={{ marginTop: "1rem", padding: "0.5rem 1rem", backgroundColor: "#1976d2", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>
             {modoEdicion ? "Guardar cambios" : "Agregar tarea"}
