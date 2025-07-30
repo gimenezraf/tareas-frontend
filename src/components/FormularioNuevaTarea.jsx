@@ -25,11 +25,16 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
     const nuevaTarea = {
       cliente,
       asunto,
-      tipo_tarea: tipoTarea,
-      tipo_proceso: tipoTarea === "judicial" ? tipoProceso : null,
-      sede: tipoTarea === "judicial" ? sede : null,
-      rol: tipoTarea === "judicial" ? rol : null,
-      fecha_limite: fechaLimite || null,
+      tipo: tipoTarea,
+      fecha_inicio: new Date().toISOString().split("T")[0],
+      ultima_actividad: "",
+      fecha_ultima_actividad: "",
+      fecha_notificacion: "",
+      dias_para_retirar_copias: 0,
+      fecha_limite_retirar_copias: "",
+      fecha_limite_acto: fechaLimite || "",
+      estado: "pendiente",
+      vencida: false
     };
 
     try {
