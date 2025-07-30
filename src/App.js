@@ -148,6 +148,7 @@ function App() {
         (a, b) => new Date(a.fecha_limite_acto) - new Date(b.fecha_limite_acto)
       );
       setTareas(tareasOrdenadas);
+      console.log("Tareas cargadas:", tareasOrdenadas);
     } catch (err) {
       console.error("Error al recargar tareas:", err);
     }
