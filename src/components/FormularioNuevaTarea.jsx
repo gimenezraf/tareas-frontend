@@ -28,11 +28,11 @@ export default function FormularioNuevaTarea({ onTareaCreada }) {
       tipo: tipoTarea,
       fecha_inicio: new Date().toISOString().split("T")[0],
       ultima_actividad: "",
-      fecha_ultima_actividad: "",
-      fecha_notificacion: "",
+      fecha_ultima_actividad: null,
+      fecha_notificacion: null,
       dias_para_retirar_copias: 0,
-      fecha_limite_retirar_copias: "",
-      fecha_limite_acto: fechaLimite || "",
+      fecha_limite_retirar_copias: null,
+      fecha_limite_acto: fechaLimite || null,
       estado: "pendiente",
       vencida: false
     };
