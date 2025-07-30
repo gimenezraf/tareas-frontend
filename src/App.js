@@ -409,7 +409,7 @@ const iniciarEdicion = (tarea) => {
 
       {mostrarFormulario && (
         <form onSubmit={handleSubmit} style={{ marginBottom: "2rem", background: "#f9f9f9", padding: "1rem", borderRadius: "10px" }}>
-          <h3>{modoEdicion ? "Editar Tarea" : "Agregar Nueva Tarea"}</h3>
+          <h3>{modoEdicion ? "Editar Tarea" : "Formulario de Nueva Tarea"}</h3>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             {/* 1. Cliente */}
