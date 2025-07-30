@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import './App.css';
+import FormularioNuevaTarea from "./components/FormularioNuevaTarea";
 const API_URL = "https://tareas-api-c5x4.onrender.com";
 
 function App() {
@@ -374,6 +375,9 @@ const iniciarEdicion = (tarea) => {
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
       <h1>ORGANIZADOR DE TAREAS</h1>
+      {mostrarFormulario && (
+        <FormularioNuevaTarea onTareaCreada={obtenerTareas} />
+      )}
       <button
         onClick={() => {
           setMostrarFormulario(!mostrarFormulario);
