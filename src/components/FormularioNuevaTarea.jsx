@@ -1,245 +1,214 @@
-import { useState } from "react";
+// Función para formatear fecha ISO (YYYY-MM-DD) a DD/MM/YYYY solo para presentación
+function formatearFechaInput(fechaISO) {
+  if (!fechaISO) return "";
+  const [year, month, day] = fechaISO.split("-");
+  return `${day}/${month}/${year}`;
+}
+import { useState, useEffect } from "react";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
+import { Label } from "./ui/label";
+import { Checkbox } from "./ui/checkbox";
 
-export default function FormularioNuevaTarea({ onTareaCreada }) {
-  const [tipoTarea, setTipoTarea] = useState("");
-  const [tipoProceso, setTipoProceso] = useState("");
-  const [fechaLimite, setFechaLimite] = useState("");
-  const [cliente, setCliente] = useState("");
-  const [asunto, setAsunto] = useState("");
-  const [sede, setSede] = useState("");
-  const [rol, setRol] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [visible, setVisible] = useState(false);
-  // Nuevos estados
-  const [tareaPendiente, setTareaPendiente] = useState("");
-  const [ultimaActividad, setUltimaActividad] = useState("");
-  const [fechaUltimaActividad, setFechaUltimaActividad] = useState("");
-  const [fechaNotificacion, setFechaNotificacion] = useState("");
-  const [hayPlazoCopias, setHayPlazoCopias] = useState(false);
-  const [fechaLimiteCopias, setFechaLimiteCopias] = useState("");
-  const [diasParaRetirarCopias, setDiasParaRetirarCopias] = useState(0);
-  const [estado, setEstado] = useState("pendiente");
-  const [etapaInicial, setEtapaInicial] = useState("");
+export default function FormularioNuevaTarea({ onTareaCreada, modoEdicion, tareaEditando }) {
+  const [formData, setFormData] = useState({
+    cliente: "",
+    asunto: "",
+    tipo_tarea: "",
+    fecha_registro: new Date().toISOString().split("T")[0],
+    ultima_actividad: "",
+    fecha_ultima_actividad: "",
+    tarea_pendiente: "",
+    fecha_limite: "",
+    estado: "",
+    es_judicial: false,
+    estructura_procesal: "",
+    rol_procesal: "",
+    fecha_decreto: "",
+  });
 
-  const calcularDiferenciaDias = () => {
-    if (!fechaLimite) return "";
-    const hoy = new Date();
-    const fecha = new Date(fechaLimite);
-    const diferencia = Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
-    return diferencia > 0
-      ? `Faltan ${diferencia} días`
-      : `Vencida hace ${Math.abs(diferencia)} días`;
+  useEffect(() => {
+    if (modoEdicion && tareaEditando) {
+      setFormData({
+        cliente: tareaEditando.cliente || "",
+        asunto: tareaEditando.asunto || "",
+        tipo_tarea: tareaEditando.tipo_tarea || "",
+        fecha_registro: tareaEditando.fecha_registro ? tareaEditando.fecha_registro.split("T")[0] : new Date().toISOString().split("T")[0],
+        ultima_actividad: tareaEditando.ultima_actividad || "",
+        fecha_ultima_actividad: tareaEditando.fecha_ultima_actividad ? tareaEditando.fecha_ultima_actividad.split("T")[0] : "",
+        tarea_pendiente: tareaEditando.tarea_pendiente || "",
+        fecha_limite: tareaEditando.fecha_limite ? tareaEditando.fecha_limite.split("T")[0] : "",
+        estado: tareaEditando.estado || "",
+        es_judicial: tareaEditando.es_judicial || false,
+        estructura_procesal: tareaEditando.estructura_procesal || "",
+        rol_procesal: tareaEditando.rol_procesal || "",
+        fecha_decreto: tareaEditando.fecha_decreto ? tareaEditando.fecha_decreto.split("T")[0] : "",
+      });
+    }
+  }, [modoEdicion, tareaEditando]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
-  const handleGuardar = async () => {
-    const nuevaTarea = {
-      cliente,
-      asunto,
-      tipo: tipoTarea,
-      descripcion: tareaPendiente,
-      estructura_procesal: tipoProceso,
-      rol_procesal: rol,
-      sede_judicial: sede,
-      etapa_inicial: etapaInicial,
-      fecha_inicio: new Date().toISOString().split("T")[0],
-      ultima_actividad: ultimaActividad,
-      fecha_ultima_actividad: fechaUltimaActividad || null,
-      fecha_notificacion: fechaNotificacion || null,
-      dias_para_retirar_copias: hayPlazoCopias ? Number(diasParaRetirarCopias) : 0,
-      fecha_limite_retirar_copias: hayPlazoCopias ? fechaLimiteCopias || null : null,
-      fecha_limite_acto: fechaLimite || null,
-      estado,
-      vencida: false
-    };
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      const res = await fetch("https://tareas-api-c5x4.onrender.com/tareas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevaTarea),
+      let response;
+      if (modoEdicion && tareaEditando && tareaEditando.id) {
+        response = await fetch(`/api/tareas/${tareaEditando.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        response = await fetch("/api/tareas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      }
+      if (!response.ok) throw new Error("Error al crear la tarea");
+
+      setFormData({
+        cliente: "",
+        asunto: "",
+        tipo_tarea: "",
+        fecha_registro: new Date().toISOString().split("T")[0],
+        ultima_actividad: "",
+        fecha_ultima_actividad: "",
+        tarea_pendiente: "",
+        fecha_limite: "",
+        estado: "",
+        es_judicial: false,
+        estructura_procesal: "",
+        rol_procesal: "",
+        fecha_decreto: "",
       });
 
-      if (res.ok) {
-        setMensaje("✅ Tarea guardada correctamente");
-        setVisible(true);
-        setTimeout(() => {
-          setVisible(false);
-          setTimeout(() => setMensaje(""), 500);
-        }, 3000);
-        setCliente("");
-        setAsunto("");
-        setTipoTarea("");
-        setTipoProceso("");
-        setSede("");
-        setRol("");
-        setFechaLimite("");
-        setTareaPendiente("");
-        setUltimaActividad("");
-        setFechaUltimaActividad("");
-        setFechaNotificacion("");
-        setHayPlazoCopias(false);
-        setFechaLimiteCopias("");
-        setDiasParaRetirarCopias(0);
-        setEstado("pendiente");
-        setEtapaInicial("");
-        if (onTareaCreada) onTareaCreada();
-      } else {
-        setMensaje("❌ Error al guardar la tarea");
-        setVisible(true);
-        setTimeout(() => {
-          setVisible(false);
-          setTimeout(() => setMensaje(""), 500);
-        }, 3000);
-      }
-    } catch (err) {
-      setMensaje("❌ Error de conexión con el servidor");
-      setVisible(true);
-      setTimeout(() => {
-        setVisible(false);
-        setTimeout(() => setMensaje(""), 500);
-      }, 3000);
+      if (onTareaCreada) onTareaCreada();
+    } catch (error) {
+      alert("No se pudo crear la tarea.");
+      console.error(error);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-semibold mb-6">Nueva Tarea</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-
-        <div>
-          <label className="block mb-1 font-medium">Cliente</label>
-          <input type="text" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Ej: Juan Pérez" className="w-full border rounded px-3 py-2" />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Asunto</label>
-          <input type="text" value={asunto} onChange={(e) => setAsunto(e.target.value)} placeholder="Ej: Juicio ordinario" className="w-full border rounded px-3 py-2" />
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="block mb-1 font-medium">Tarea pendiente</label>
-          <input type="text" value={tareaPendiente} onChange={(e) => setTareaPendiente(e.target.value)} placeholder="Ej: Redactar demanda" className="w-full border rounded px-3 py-2" />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Tipo de tarea</label>
-          <select value={tipoTarea} onChange={(e) => setTipoTarea(e.target.value)} className="w-full border rounded px-3 py-2">
-            <option value="">Seleccionar</option>
-            <option value="judicial">Judicial</option>
-            <option value="no_judicial">No Judicial</option>
-          </select>
-        </div>
-
-        {tipoTarea === "judicial" && (
-          <>
-            <div>
-              <label className="block mb-1 font-medium">Tipo de proceso judicial</label>
-              <select value={tipoProceso} onChange={(e) => setTipoProceso(e.target.value)} className="w-full border rounded px-3 py-2">
-                <option value="">Seleccionar</option>
-                <option value="ordinario">Ordinario</option>
-                <option value="laboral">Laboral</option>
-                <option value="monitorio">Monitorio</option>
-                <option value="penal">Penal</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block mb-1 font-medium">Etapa procesal inicial</label>
-              <input type="text" value={etapaInicial} onChange={(e) => setEtapaInicial(e.target.value)} placeholder="Ej: Demanda" className="w-full border rounded px-3 py-2" />
-            </div>
-          </>
-        )}
-
-        <div>
-          <label className="block mb-1 font-medium">Fecha de inicio</label>
-          <input
-            type="date"
-            value={fechaUltimaActividad || new Date().toISOString().split("T")[0]}
-            onChange={(e) => setFechaUltimaActividad(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Última actividad realizada</label>
-          <input type="text" value={ultimaActividad} onChange={(e) => setUltimaActividad(e.target.value)} placeholder="Ej: Entrega de demanda" className="w-full border rounded px-3 py-2" />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Fecha de última actividad</label>
-          <input type="date" value={fechaUltimaActividad} onChange={(e) => setFechaUltimaActividad(e.target.value)} className="w-full border rounded px-3 py-2" />
-        </div>
-
-        {rol === "demandado" && (
+    <Card className="w-full max-w-2xl mx-auto p-6 shadow-xl rounded-2xl">
+      <CardContent>
+        <h2 className="text-2xl font-semibold text-indigo-700 mb-6">📋 Nueva Tarea</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-1 font-medium">Fecha de notificación</label>
-            <input type="date" value={fechaNotificacion} onChange={(e) => setFechaNotificacion(e.target.value)} className="w-full border rounded px-3 py-2" />
+            <Label htmlFor="cliente">Cliente *</Label>
+            <Input name="cliente" value={formData.cliente} onChange={handleChange} required />
           </div>
-        )}
 
-        <div className="md:col-span-2">
-          <label className="inline-flex items-center space-x-2 font-medium">
-            <input type="checkbox" checked={hayPlazoCopias} onChange={(e) => setHayPlazoCopias(e.target.checked)} />
-            <span>¿Hay plazo para copias?</span>
-          </label>
-        </div>
+          <div>
+            <Label htmlFor="asunto">Asunto *</Label>
+            <Textarea name="asunto" value={formData.asunto} onChange={handleChange} required />
+          </div>
 
-        {hayPlazoCopias && (
-          <>
-            <div>
-              <label className="block mb-1 font-medium">Fecha límite para copias</label>
-              <input type="date" value={fechaLimiteCopias} onChange={(e) => setFechaLimiteCopias(e.target.value)} className="w-full border rounded px-3 py-2" />
+          <div>
+            <Label htmlFor="tipo_tarea">Tipo de tarea</Label>
+            <Input name="tipo_tarea" value={formData.tipo_tarea} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label htmlFor="fecha_registro">
+              Fecha de inicio
+              {formData.fecha_registro && (
+                <span className="ml-2 text-xs text-gray-500">
+                  ({formatearFechaInput(formData.fecha_registro)})
+                </span>
+              )}
+            </Label>
+            <Input type="date" name="fecha_registro" value={formData.fecha_registro} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label htmlFor="ultima_actividad">Última actividad realizada</Label>
+            <Textarea name="ultima_actividad" value={formData.ultima_actividad} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label htmlFor="fecha_ultima_actividad">
+              Fecha de última actividad
+              {formData.fecha_ultima_actividad && (
+                <span className="ml-2 text-xs text-gray-500">
+                  ({formatearFechaInput(formData.fecha_ultima_actividad)})
+                </span>
+              )}
+            </Label>
+            <Input type="date" name="fecha_ultima_actividad" value={formData.fecha_ultima_actividad} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label htmlFor="tarea_pendiente">Tarea pendiente</Label>
+            <Textarea name="tarea_pendiente" value={formData.tarea_pendiente} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label htmlFor="fecha_limite">
+              Fecha Límite
+              {formData.fecha_limite && (
+                <span className="ml-2 text-xs text-gray-500">
+                  ({formatearFechaInput(formData.fecha_limite)})
+                </span>
+              )}
+            </Label>
+            <Input type="date" name="fecha_limite" value={formData.fecha_limite} onChange={handleChange} />
+          </div>
+
+          <div>
+            <Label htmlFor="estado">Estado</Label>
+            <Input name="estado" value={formData.estado} onChange={handleChange} />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="es_judicial"
+              name="es_judicial"
+              checked={formData.es_judicial}
+              onCheckedChange={(checked) => setFormData({ ...formData, es_judicial: checked })}
+            />
+            <Label htmlFor="es_judicial">Es Judicial</Label>
+          </div>
+
+          {formData.es_judicial && (
+            <div className="space-y-4 border p-4 rounded-xl bg-slate-50">
+              <div>
+                <Label htmlFor="estructura_procesal">Estructura Procesal</Label>
+                <Input name="estructura_procesal" value={formData.estructura_procesal} onChange={handleChange} />
+              </div>
+
+              <div>
+                <Label htmlFor="rol_procesal">Rol Procesal</Label>
+                <Input name="rol_procesal" value={formData.rol_procesal} onChange={handleChange} />
+              </div>
+
+              <div>
+                <Label htmlFor="fecha_decreto">
+                  Fecha Decreto
+                  {formData.fecha_decreto && (
+                    <span className="ml-2 text-xs text-gray-500">
+                      ({formatearFechaInput(formData.fecha_decreto)})
+                    </span>
+                  )}
+                </Label>
+                <Input type="date" name="fecha_decreto" value={formData.fecha_decreto} onChange={handleChange} />
+              </div>
             </div>
+          )}
 
-            <div>
-              <label className="block mb-1 font-medium">Días para retirar copias</label>
-              <input type="number" value={diasParaRetirarCopias} onChange={(e) => setDiasParaRetirarCopias(e.target.value)} className="w-full border rounded px-3 py-2" />
-            </div>
-          </>
-        )}
-
-        <div>
-          <label className="block mb-1 font-medium">Fecha límite acto</label>
-          <input type="date" value={fechaLimite} onChange={(e) => setFechaLimite(e.target.value)} className="w-full border rounded px-3 py-2" />
-          <p className="text-sm text-gray-500 mt-1">{calcularDiferenciaDias()}</p>
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Estado</label>
-          <select value={estado} onChange={(e) => setEstado(e.target.value)} className="w-full border rounded px-3 py-2">
-            <option value="pendiente">Pendiente</option>
-            <option value="completado">Completado</option>
-          </select>
-        </div>
-
-        {tipoTarea === "judicial" && (
-          <>
-            <div>
-              <label className="block mb-1 font-medium">Sede Judicial</label>
-              <input type="text" value={sede} onChange={(e) => setSede(e.target.value)} placeholder="Ej: Juzgado de Maldonado" className="w-full border rounded px-3 py-2" />
-            </div>
-
-            <div>
-              <label className="block mb-1 font-medium">Rol procesal</label>
-              <select value={rol} onChange={(e) => setRol(e.target.value)} className="w-full border rounded px-3 py-2">
-                <option value="">Seleccionar</option>
-                <option value="actor">Parte actora</option>
-                <option value="demandado">Parte demandada</option>
-              </select>
-            </div>
-          </>
-        )}
-
-        <div className="md:col-span-2 text-center mt-6">
-          <button onClick={handleGuardar} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">Guardar tarea</button>
-        </div>
-      </div>
-
-      {mensaje && (
-        <p className={`mt-4 text-center font-medium ${mensaje.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>
-          {mensaje}
-        </p>
-      )}
-    </div>
+          <Button type="submit" className="w-full">{modoEdicion ? "Actualizar tarea" : "Crear Tarea"}</Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
