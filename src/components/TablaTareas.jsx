@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -43,6 +44,8 @@ export default function TablaTareas({ onEditarTarea }) {
     fecha_registro: "",
     requiere_retiro_copias: false,
   });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("/api/tareas")
@@ -121,6 +124,9 @@ export default function TablaTareas({ onEditarTarea }) {
                 {expandedId === tarea.id ? "Ocultar historial" : "Ver historial"}
               </Button>
               <Button variant="secondary" onClick={() => onEditarTarea(tarea)}>Editar</Button>
+              <Button variant="outline" onClick={() => navigate(`/workflows/${tarea.id}`)}>
+                Abrir workflow
+              </Button>
             </div>
           </div>
 

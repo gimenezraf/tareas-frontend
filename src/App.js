@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import './App.css';
 import FormularioNuevaTarea from "./components/FormularioNuevaTarea";
 import TablaTareas from "./components/TablaTareas";
+import { Routes, Route } from "react-router-dom";
+import Workflow from "./pages/Workflow";
 const API_URL = "https://tareas-api-c5x4.onrender.com";
 
 function App() {
@@ -89,92 +91,99 @@ function App() {
 
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h1>ORGANIZADOR DE TAREAS</h1>
-      {mostrarFormulario && (
-        <FormularioNuevaTarea
-          onTareaCreada={obtenerTareas}
-          modoEdicion={modoEdicion}
-          tareaEditando={tareaEditando}
-        />
-      )}
-      <button
-        onClick={() => {
-          setMostrarFormulario(!mostrarFormulario);
-          setModoEdicion(false);
-          setFormData({
-            cliente: "",
-            asunto: "",
-            tipo: "judicial",
-            fecha_inicio: "",
-            ultima_actividad: "",
-            fecha_ultima_actividad: "",
-            fecha_notificacion: "",
-            dias_para_retirar_copias: "",
-            fecha_limite_retirar_copias: "",
-            fecha_limite_acto: "",
-            estado: "pendiente",
-            vencida: false,
-          });
-        }}
-        style={{
-          marginBottom: "1rem",
-          padding: "0.5rem 1rem",
-          fontSize: "1rem",
-          borderRadius: "5px",
-          backgroundColor: "#1976d2",
-          color: "white",
-          border: "none",
-          cursor: "pointer",
-        }}
-      >
-        {mostrarFormulario ? "Cancelar" : "➕ Agregar tarea"}
-      </button>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
+            <h1>ORGANIZADOR DE TAREAS</h1>
+            {mostrarFormulario && (
+              <FormularioNuevaTarea
+                onTareaCreada={obtenerTareas}
+                modoEdicion={modoEdicion}
+                tareaEditando={tareaEditando}
+              />
+            )}
+            <button
+              onClick={() => {
+                setMostrarFormulario(!mostrarFormulario);
+                setModoEdicion(false);
+                setFormData({
+                  cliente: "",
+                  asunto: "",
+                  tipo: "judicial",
+                  fecha_inicio: "",
+                  ultima_actividad: "",
+                  fecha_ultima_actividad: "",
+                  fecha_notificacion: "",
+                  dias_para_retirar_copias: "",
+                  fecha_limite_retirar_copias: "",
+                  fecha_limite_acto: "",
+                  estado: "pendiente",
+                  vencida: false,
+                });
+              }}
+              style={{
+                marginBottom: "1rem",
+                padding: "0.5rem 1rem",
+                fontSize: "1rem",
+                borderRadius: "5px",
+                backgroundColor: "#1976d2",
+                color: "white",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              {mostrarFormulario ? "Cancelar" : "➕ Agregar tarea"}
+            </button>
 
+            <div style={{ marginBottom: "2rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+              <input name="cliente" value={filtros.cliente} onChange={handleFiltroChange} placeholder="Filtrar por cliente" />
+              <select name="tipo" value={filtros.tipo} onChange={handleFiltroChange}>
+                <option value="">Todos los tipos</option>
+                <option value="judicial">Judicial</option>
+                <option value="no_judicial">No judicial</option>
+              </select>
+              <select name="estado" value={filtros.estado} onChange={handleFiltroChange}>
+                <option value="">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="en curso">En curso</option>
+                <option value="finalizada">Finalizada</option>
+              </select>
+            </div>
 
-      <div style={{ marginBottom: "2rem", display: "flex", gap: "1rem", alignItems: "center" }}>
-        <input name="cliente" value={filtros.cliente} onChange={handleFiltroChange} placeholder="Filtrar por cliente" />
-        <select name="tipo" value={filtros.tipo} onChange={handleFiltroChange}>
-          <option value="">Todos los tipos</option>
-          <option value="judicial">Judicial</option>
-          <option value="no_judicial">No judicial</option>
-        </select>
-        <select name="estado" value={filtros.estado} onChange={handleFiltroChange}>
-          <option value="">Todos los estados</option>
-          <option value="pendiente">Pendiente</option>
-          <option value="en curso">En curso</option>
-          <option value="finalizada">Finalizada</option>
-        </select>
-      </div>
+            <div style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+              <label>Ordenar por:</label>
+              <select value={orden} onChange={(e) => setOrden(e.target.value)}>
+                <option value="fecha_limite_acto">Fecha límite</option>
+                <option value="cliente">Cliente</option>
+                <option value="estado">Estado</option>
+              </select>
+              <button
+                onClick={() => setOrdenDescendente(!ordenDescendente)}
+                style={{
+                  padding: "0.4rem 0.8rem",
+                  backgroundColor: "#1976d2",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                {ordenDescendente ? "⬇️ Descendente" : "⬆️ Ascendente"}
+              </button>
+            </div>
 
-      <div style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem", alignItems: "center" }}>
-        <label>Ordenar por:</label>
-        <select value={orden} onChange={(e) => setOrden(e.target.value)}>
-          <option value="fecha_limite_acto">Fecha límite</option>
-          <option value="cliente">Cliente</option>
-          <option value="estado">Estado</option>
-        </select>
-          <button
-            onClick={() => setOrdenDescendente(!ordenDescendente)}
-            style={{
-            padding: "0.4rem 0.8rem",
-            backgroundColor: "#1976d2",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer"
-    }}
-  >
-        {ordenDescendente ? "⬇️ Descendente" : "⬆️ Ascendente"}
-          </button>
-      </div>
-
-      <TablaTareas onEditarTarea={(tarea) => {
-        setTareaEditando(tarea);
-        setModoEdicion(true);
-        setMostrarFormulario(true);
-      }} />
-    </div>
+            <TablaTareas onEditarTarea={(tarea) => {
+              setTareaEditando(tarea);
+              setModoEdicion(true);
+              setMostrarFormulario(true);
+            }} />
+          </div>
+        }
+      />
+      <Route path="/workflows/:tareaId" element={<Workflow />} />
+    </Routes>
   );
 }
 

@@ -4,7 +4,7 @@ export default function ListaTareas() {
   const [tareas, setTareas] = useState([]);
 
   useEffect(() => {
-    fetch("https://tareas-api-c5x4.onrender.com/tareas")
+    fetch("/api/tareas")
       .then((res) => res.json())
       .then((data) => setTareas(data))
       .catch((err) => console.error("Error al cargar tareas:", err));

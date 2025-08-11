@@ -1,9 +1,3 @@
-// Función para formatear fecha ISO (YYYY-MM-DD) a DD/MM/YYYY solo para presentación
-function formatearFechaInput(fechaISO) {
-  if (!fechaISO) return "";
-  const [year, month, day] = fechaISO.split("-");
-  return `${day}/${month}/${year}`;
-}
 import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -12,9 +6,17 @@ import { Card, CardContent } from "./ui/card";
 import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
 
+// Función para formatear fecha ISO (YYYY-MM-DD) a DD/MM/YYYY solo para presentación
+function formatearFechaInput(fechaISO) {
+  if (!fechaISO) return "";
+  const [year, month, day] = fechaISO.split("-");
+  return `${day}/${month}/${year}`;
+}
+
 export default function FormularioNuevaTarea({ onTareaCreada, modoEdicion, tareaEditando }) {
   const [formData, setFormData] = useState({
     cliente: "",
+    tarea: "",
     asunto: "",
     tipo_tarea: "",
     fecha_registro: new Date().toISOString().split("T")[0],
@@ -33,6 +35,7 @@ export default function FormularioNuevaTarea({ onTareaCreada, modoEdicion, tarea
     if (modoEdicion && tareaEditando) {
       setFormData({
         cliente: tareaEditando.cliente || "",
+        tarea: tareaEditando.tarea || "",
         asunto: tareaEditando.asunto || "",
         tipo_tarea: tareaEditando.tipo_tarea || "",
         fecha_registro: tareaEditando.fecha_registro ? tareaEditando.fecha_registro.split("T")[0] : new Date().toISOString().split("T")[0],
@@ -78,6 +81,7 @@ export default function FormularioNuevaTarea({ onTareaCreada, modoEdicion, tarea
 
       setFormData({
         cliente: "",
+        tarea: "",
         asunto: "",
         tipo_tarea: "",
         fecha_registro: new Date().toISOString().split("T")[0],
@@ -107,6 +111,11 @@ export default function FormularioNuevaTarea({ onTareaCreada, modoEdicion, tarea
           <div>
             <Label htmlFor="cliente">Cliente *</Label>
             <Input name="cliente" value={formData.cliente} onChange={handleChange} required />
+          </div>
+
+          <div>
+            <Label htmlFor="tarea">Título de la tarea *</Label>
+            <Input name="tarea" value={formData.tarea} onChange={handleChange} required />
           </div>
 
           <div>
